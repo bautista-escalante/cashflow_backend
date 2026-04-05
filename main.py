@@ -1,9 +1,25 @@
+from infrastructure.database.db import engine, Base
+from core.models.Plataforma import Plataforma
+from core.models.Movimiento import Movimiento
+from api.schemas.PlataformaSchema import PlataformaCreate
+
 from fastapi import FastAPI
-from api.routes.Movimiento_routes import Movimiento
+from api.routes.Movimiento_routes import Movimiento_routes
+from api.routes.Plataforma_routes import plataforma_routes
+
+from infrastructure.database.db import SessionLocal
+import datetime
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.include_router(Movimiento)
+app.include_router(Movimiento_routes)
+app.include_router(plataforma_routes)
+
+@app.get("/")
+def root():
+    return {"mensaje": "API funcionando"}
 
 """ 
 desde el frontend me llega 
@@ -50,3 +66,4 @@ esto entra en use cases:
     deberia guardar un registro de la permutacion en la base de datos?
         
 """
+
