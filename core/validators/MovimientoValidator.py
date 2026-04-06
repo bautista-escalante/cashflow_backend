@@ -18,3 +18,18 @@ class MovimientoValidator(MovimientoBase):
                 raise ValueError("origen y destino son obligatorios")
 
         return self
+    
+    @staticmethod
+    def validar_permutacion(self, origen, destino, permutacion):
+        if self.tipo == "permutacion":
+            if not self.plataforma_origen_id or not self.plataforma_destino_id:
+                raise ValueError("origen y destino son obligatorios")
+        
+        if not origen or not destino:
+            raise ValueError("Plataforma no encontrada")
+
+        if origen.saldo < permutacion.monto:
+            raise ValueError("Saldo insuficiente")
+        
+        if origen.id == destino.id:
+            raise ValueError("No se puede permutar a la misma plataforma")

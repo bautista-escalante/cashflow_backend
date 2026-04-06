@@ -14,13 +14,19 @@ def agregar_plataforma(plataforma: PlataformaCreate, db: Session = Depends(get_d
     try:
         return plataforma_case.crear_plataforma(db, plataforma)
     
+    except ValueError as ve:
+        return JSONResponse({"error": str(ve)}, status_code=400)
+    
     except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=400)
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @plataforma_routes.get("/plataformas", response_model=list[PlataformaResponse])
 def obtener_plataformas(db: Session = Depends(get_db)):
     try:
         return plataforma_case.obtener_plataformas(db)
+    
+    except ValueError as ve:
+        return JSONResponse({"error": str(ve)}, status_code=400) 
     
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -30,5 +36,8 @@ def obtener_plataforma(nombre: str, db: Session = Depends(get_db)):
     try:
         return plataforma_case.obtener_plataforma(db, nombre.lower().strip())
     
+    except ValueError as ve:
+        return JSONResponse({"error": str(ve)}, status_code=400)
+    
     except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=400)
+        return JSONResponse({"error": str(e)}, status_code=500)
