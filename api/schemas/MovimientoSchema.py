@@ -1,22 +1,18 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import date
 
 
-class MovimientoBase(BaseModel):
+class MovimientoCreate(BaseModel):
     
     tipo: str  # ingreso | gasto | permutacion
     monto: float
-    fecha: datetime
+    plataforma_id: int = None
     descripcion: Optional[str] = None
+    fecha: Optional[date] = None
     categoria: Optional[str] = None
 
-class MovimientoCreate(MovimientoBase):
-    plataforma_id: Optional[int] = None
-    plataforma_origen_id: Optional[int] = None
-    plataforma_destino_id: Optional[int] = None
-    
-class MovimientoResponse(MovimientoBase):
+class MovimientoResponse(MovimientoCreate):
     id: int
 
     class Config:

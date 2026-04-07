@@ -1,13 +1,11 @@
 from pydantic import model_validator
 from typing import Optional
-from api.schemas.MovimientoSchema import MovimientoBase
 from core.models.Plataforma import Plataforma
 from api.schemas.PermutacionSchema import PermutacionCreate
+from api.schemas.MovimientoSchema import MovimientoCreate
 
-class MovimientoValidator(MovimientoBase):
-    plataforma_id: Optional[int] = None
-    plataforma_origen_id: Optional[int] = None
-    plataforma_destino_id: Optional[int] = None
+class MovimientoValidator():
+  
     
     @staticmethod
     def validar_permutacion(origen: Plataforma, destino: Plataforma, permutacion):
@@ -35,9 +33,24 @@ class MovimientoValidator(MovimientoBase):
         if origen.nombre != "dolares" and destino.nombre != "dolares":
             raise ValueError("en esta ruta solo se pueden permutar dólares")
         
-        print(movimiento)
         if movimiento == "compra" and origen.saldo < permutacion.monto * cambio_dolar:
             raise ValueError("Saldo insuficiente")
 
         if movimiento == "venta" and origen.saldo < permutacion.monto:
             raise ValueError("Saldo insuficiente") 
+        
+    def validar_movimiento(movimiento: MovimientoCreate, plataforma: Plataforma):
+        if movimiento.tipo not in ["ingreso", "gasto", "permutacion"]:
+            raise ValueError("Tipo de movimiento inválido")
+        
+        if movimiento.tipo == "gasto" and (not movimiento.descripcion or not movimiento.categoria):
+            raise ValueError("Los gastos deben tener descripción y categoría")
+        
+        if movimiento.plataforma_id is None:
+            raise ValueError("El movimiento debe tener una plataforma asociada")
+        
+        if movimiento.tipo == "gasto" and plataforma.saldo < movimiento.monto:
+            raise ValueError("Saldo insuficiente")
+        
+        if movimiento.monto <= 0:
+            raise ValueError("El monto no puede ser negativo o cero")

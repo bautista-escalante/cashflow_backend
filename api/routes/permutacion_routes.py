@@ -27,7 +27,7 @@ def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(g
 def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), response_model=PermutacionResponse):
     try:
         return permutacion_case.permutar_dolar(db, permutacion)
-    
+
     except ValueError as ve:
         return JSONResponse(status_code=400, content={"error": str(ve)})
     

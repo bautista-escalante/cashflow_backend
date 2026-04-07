@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import date
 
 
 class PermutacionCreate(BaseModel):
 
     tipo: str = "permutacion"
     monto: float
-    fecha: datetime = datetime.now()
+    fecha: date
     plataforma_origen_id: int
     plataforma_destino_id: int
 

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from datetime import date
 import requests
 
 from core.models.Plataforma import Plataforma
@@ -6,6 +7,7 @@ from api.schemas.PermutacionSchema import PermutacionCreate
 from core.validators.MovimientoValidator import MovimientoValidator
 from api.schemas.PermutacionSchema import PermutacionResponse
 from core.models.Movimiento import Movimiento
+
 
 class PermutacionCase:
 
@@ -23,11 +25,11 @@ class PermutacionCase:
    
         origen.saldo -= permutacion.monto
         destino.saldo += permutacion.monto
-        
+
         db.add(Movimiento(
             tipo=permutacion.tipo,
             monto=permutacion.monto,
-            fecha=permutacion.fecha,
+            fecha=date.today(),
             descripcion=f"cambio de {origen.nombre} a {destino.nombre}",
             plataforma_origen_id=origen.id,
             plataforma_destino_id=destino.id
@@ -64,7 +66,7 @@ class PermutacionCase:
         db.add(Movimiento(
             tipo=permutacion.tipo,
             monto=permutacion.monto,
-            fecha=permutacion.fecha,
+            fecha= date.today(),
             descripcion=f"{movimiento} de {origen.nombre} a {destino.nombre} a razon de {dolares['venta'] if movimiento == 'compra' else dolares['compra']} cada dólar",
             plataforma_origen_id=origen.id,
             plataforma_destino_id=destino.id
