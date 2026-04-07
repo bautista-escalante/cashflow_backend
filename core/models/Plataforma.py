@@ -8,8 +8,8 @@ class Plataforma(Base):
     nombre = Column(String(100))
     saldo = Column(Float)
     fecha = Column(DateTime)
-    
+
     def __init__(self, nombre: str, saldo: float, fecha):
-        self.nombre = nombre
+        self.nombre = nombre.lower().strip()
         self.saldo = saldo
         self.fecha = fecha

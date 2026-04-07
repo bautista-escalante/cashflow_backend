@@ -8,7 +8,9 @@ from infrastructure.database.db import engine, Base
 from core.models.Plataforma import Plataforma
 from core.models.Movimiento import Movimiento
 
+from infrastructure.database.db import engine, Base
 
+#Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()

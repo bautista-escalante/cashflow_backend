@@ -13,9 +13,23 @@ Permutacion_routes = APIRouter()
 
 # realizar una permutacion entre plataformas
 @Permutacion_routes.post("/permutacion") 
-def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db)):
+def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), response_model=PermutacionResponse):
     try:
         return permutacion_case.generar_permutaciones(db, permutacion)
-        
+    
+    except ValueError as ve:
+        return JSONResponse(status_code=400, content={"error": str(ve)})
+    
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@Permutacion_routes.post("/permutacion_dolar") 
+def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), response_model=PermutacionResponse):
+    try:
+        return permutacion_case.permutar_dolar(db, permutacion)
+    
+    except ValueError as ve:
+        return JSONResponse(status_code=400, content={"error": str(ve)})
+    
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+
 from core.models.Plataforma import Plataforma
 from api.schemas.PlataformaSchema import PlataformaCreate
 from core.validators.PlataformaValidator import PlataformaValidator
