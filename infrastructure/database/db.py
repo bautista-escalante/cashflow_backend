@@ -1,8 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+import os
+from dotenv import load_dotenv
 
-engine = create_engine("postgresql://postgres:1234@localhost:5433/cashflow")
+load_dotenv()
+
+engine = create_engine(os.getenv("DATABASE_URL"))
 
 SessionLocal = sessionmaker(bind=engine)
 
