@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
 from core.models.Plataforma import Plataforma
 from api.schemas.PlataformaSchema import PlataformaCreate
@@ -27,6 +28,6 @@ class PlataformaCase:
         plataforma = db.query(Plataforma).filter(Plataforma.nombre == nombre).first()
         
         if not plataforma:
-            raise ValueError("No se encontró la plataforma.")
+            raise HTTPException(status_code=404, detail="Plataforma no encontrada.")
         
         return plataforma

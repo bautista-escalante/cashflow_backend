@@ -11,6 +11,7 @@ class MovimientoCreate(BaseModel):
     descripcion: Optional[str] = None
     fecha: Optional[date] = None
     categoria: Optional[str] = None
+    usuario_id: int
 
 class MovimientoResponse(MovimientoCreate):
     id: int

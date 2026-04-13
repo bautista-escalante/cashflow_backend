@@ -12,11 +12,12 @@ class Movimiento(Base):
     descripcion = Column(String(200))
     categoria = Column(String(100))
 
+    usuario_id = Column(Integer, ForeignKey('usuarios.id'))
     plataforma_id = Column(Integer, ForeignKey('plataformas.id'))
     plataforma_origen_id = Column(Integer, ForeignKey('plataformas.id'))
     plataforma_destino_id = Column(Integer, ForeignKey('plataformas.id'))
     
+    usuario = relationship("Usuario", foreign_keys=[usuario_id])
     plataforma = relationship("Plataforma", foreign_keys=[plataforma_id])
     plataforma_origen = relationship("Plataforma", foreign_keys=[plataforma_origen_id])
     plataforma_destino = relationship("Plataforma", foreign_keys=[plataforma_destino_id])
-    

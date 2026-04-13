@@ -10,6 +10,7 @@ class PermutacionCreate(BaseModel):
     fecha: date
     plataforma_origen_id: int
     plataforma_destino_id: int
+    usuario_id: int
 
 class PermutacionResponse(PermutacionCreate):
     id: int
