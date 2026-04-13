@@ -13,6 +13,10 @@ class UsuarioCreate(BaseModel):
     nombre: str
     email: EmailStr
     clave: str
+ 
+class UsuarioModify(BaseModel):
+    id: int
+    clave: str
 
 class UsuarioResponse(UsuarioCreate):
     id: int

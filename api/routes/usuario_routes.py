@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioResponse
+from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioModify, UsuarioResponse
 from infrastructure.database.db import get_db
 from core.models.Usuario import Usuario
 from core.use_cases.UsuarioCase import UsuarioCase
@@ -14,4 +14,17 @@ def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):
     
     return usuario_case.crear_usuario(usuario, db)
 
+@usuario_router.get("/", response_model=UsuarioResponse)
+def obtener_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    
+    return usuario_case.obtener_usuario(usuario_id, db)
 
+@usuario_router.put("/", response_model=UsuarioResponse)
+def actualizar_usuario(usuario: UsuarioModify, db: Session = Depends(get_db)):
+    
+    return usuario_case.actualizar_usuario(usuario, db)
+
+@usuario_router.delete("/{usuario_id}")
+def eliminar_usuario(usuario_id: int, db: Session = Depends(get_db)):
+    
+    return usuario_case.eliminar_usuario(usuario_id, db)
