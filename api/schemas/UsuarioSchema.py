@@ -17,6 +17,10 @@ class UsuarioCreate(BaseModel):
 class UsuarioModify(BaseModel):
     id: int
     clave: str
+    
+class UsuarioAuth(BaseModel):
+    email: EmailStr
+    clave: str
 
 class UsuarioResponse(UsuarioCreate):
     id: int

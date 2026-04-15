@@ -1,11 +1,18 @@
+from datetime import datetime, timedelta
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from jwt import encode, decode, ExpiredSignatureError, InvalidTokenError
+
+import os
+from dotenv import load_dotenv
+
 from core.models.Usuario import Usuario
 from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioModify, UsuarioResponse
 from core.validators.UsuarioValidator import UsuarioValidator
-from datetime import datetime
 
-from passlib.context import CryptContext
 
+load_dotenv()
 crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UsuarioCase:
@@ -61,3 +68,24 @@ class UsuarioCase:
         db.refresh(usuario_db)
 
         return {"detail": "Usuario eliminado exitosamente."}
+
+    def autenticar_usuario(self, email: str, clave: str, db: Session):
+        
+        usuario_db = db.query(Usuario).filter(Usuario.email == email, Usuario.eliminado_el.is_(None)).first()
+
+        if not usuario_db:
+            raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+        
+        if not crypt_context.verify(clave, usuario_db.clave):
+            raise HTTPException(status_code=401, detail="clave incorrecta.")
+
+        print(os.getenv("SECRET_KEY"))
+        token = encode(
+            {
+                "user_id": usuario_db.id,
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            }, 
+            os.getenv("SECRET_KEY"), 
+            algorithm=os.getenv("ALGORITHM"))
+
+        return {"access_token": token, "token_type": "bearer"}
