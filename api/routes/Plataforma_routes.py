@@ -9,7 +9,7 @@ from core.use_cases.PlataformaCase import PlataformaCase
 plataforma_routes = APIRouter()
 plataforma_case = PlataformaCase()
 
-@plataforma_routes.post("/plataforma", status_code=201, response_model=PlataformaResponse)
+@plataforma_routes.post("/plataforma", response_model=PlataformaResponse)
 def agregar_plataforma(plataforma: PlataformaCreate, db: Session = Depends(get_db)):
     try:
         return plataforma_case.crear_plataforma(db, plataforma)

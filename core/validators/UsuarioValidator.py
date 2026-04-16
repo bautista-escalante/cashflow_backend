@@ -1,5 +1,5 @@
 from core.models.Usuario import Usuario
-from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioModify, UsuarioResponse
+from api.schemas.UsuarioSchema import UsuarioCreate
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -23,19 +23,22 @@ class UsuarioValidator:
 
     @staticmethod
     def verificar_usuario_existe(usuario_id: int, db: Session):
-        if not db.query(Usuario).filter(Usuario.id == usuario_id, Usuario.eliminado_el.is_(None)).first():
+        usuario = db.query(Usuario).filter(Usuario.id == usuario_id, Usuario.eliminado_el.is_(None)).first()
+        if not usuario:
             
             raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+
+        return usuario
     
     @staticmethod
-    def verificar_clave_distinta(usuario_id: int, usuario_modify: UsuarioModify, db: Session, crypt_context):
+    def verificar_clave_distinta(usuario_id: int, clave, db: Session, crypt_context):
         usuario = db.query(Usuario).filter(Usuario.id == usuario_id, Usuario.eliminado_el.is_(None)).first()
 
         if not usuario:
             raise HTTPException(status_code=404, detail="Usuario no encontrado.")
 
-        if len(usuario_modify.clave) < 8:
+        if len(clave) < 8:
             raise HTTPException(status_code=400, detail="La nueva clave debe tener al menos 8 caracteres.")
 
-        if crypt_context.verify(usuario_modify.clave, usuario.clave):
+        if crypt_context.verify(clave, usuario.clave):
             raise HTTPException(status_code=400, detail="La nueva clave debe ser diferente a la actual.")

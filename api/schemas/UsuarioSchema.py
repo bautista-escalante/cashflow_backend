@@ -12,11 +12,6 @@ class UsuarioSchema(BaseModel):
 class UsuarioCreate(BaseModel):
     nombre: str
     email: EmailStr
-    clave: str
- 
-class UsuarioModify(BaseModel):
-    id: int
-    clave: str
     
 class UsuarioAuth(BaseModel):
     email: EmailStr
