@@ -1,23 +1,20 @@
 from pydantic import BaseModel, EmailStr
 
-class UsuarioSchema(BaseModel):
-    id: int
+class UsuarioBase(BaseModel):
     nombre: str
     email: EmailStr
+
+
+class UsuarioCreate(UsuarioBase):
     clave: str
 
-    class Config:
-        orm_mode = True
-        
-class UsuarioCreate(BaseModel):
-    nombre: str
-    email: EmailStr
-    
+
 class UsuarioAuth(BaseModel):
     email: EmailStr
     clave: str
 
-class UsuarioResponse(UsuarioCreate):
+
+class UsuarioResponse(UsuarioBase):
     id: int
 
     class Config:

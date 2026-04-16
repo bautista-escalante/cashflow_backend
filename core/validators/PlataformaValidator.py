@@ -6,7 +6,7 @@ from sqlalchemy import func
 
 class PlataformaValidator:
     @staticmethod
-    def validar_plataforma(db: Session, plataforma: PlataformaCreate):
+    def validar_plataforma(db: Session, plataforma: PlataformaCreate, id_usuario):
         if not plataforma.nombre:
             raise HTTPException(status_code=400, detail="El nombre es obligatorio.")
         
@@ -14,6 +14,7 @@ class PlataformaValidator:
             raise HTTPException(status_code=400, detail="El saldo no puede ser negativo.")
         
         if db.query(Plataforma).filter(
-            func.lower(func.trim(Plataforma.nombre)) == plataforma.nombre.strip().lower()
+            func.lower(func.trim(Plataforma.nombre)) == plataforma.nombre.strip().lower(),
+            Plataforma.id_usuario == id_usuario
         ).first():
             raise HTTPException(status_code=400, detail="Ya existe una plataforma con ese nombre.")
