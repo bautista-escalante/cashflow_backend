@@ -38,9 +38,9 @@ class MovimientoValidator():
 
         if movimiento == "venta" and origen.saldo < permutacion.monto:
             raise HTTPException(status_code=400, detail="Saldo insuficiente") 
-        
+
     def validar_movimiento(movimiento: MovimientoCreate, plataforma: Plataforma):
-        if movimiento.tipo not in ["ingreso", "gasto", "permutacion"]:
+        if movimiento.tipo not in ["ingreso", "gasto"]:
             raise HTTPException(status_code=400, detail="Tipo de movimiento inválido")
         
         if movimiento.tipo == "gasto" and (not movimiento.descripcion or not movimiento.categoria):
@@ -48,6 +48,9 @@ class MovimientoValidator():
         
         if movimiento.plataforma_id is None:
             raise HTTPException(status_code=400, detail="El movimiento debe tener una plataforma asociada")
+        
+        if not plataforma:
+            raise HTTPException(status_code=404, detail="plataforma no encontrada")
         
         if movimiento.tipo == "gasto" and plataforma.saldo < movimiento.monto:
             raise HTTPException(status_code=400, detail="Saldo insuficiente")

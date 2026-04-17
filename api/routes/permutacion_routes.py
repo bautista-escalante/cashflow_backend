@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from core.use_cases.PermutacionCase import PermutacionCase
 from api.schemas.PermutacionSchema import PermutacionCreate, PermutacionResponse
 from infrastructure.database.db import get_db
+from infrastructure.service.AuthService import AuthService
 
 
 permutacion_case = PermutacionCase()
@@ -13,23 +14,14 @@ Permutacion_routes = APIRouter()
 
 # realizar una permutacion entre plataformas
 @Permutacion_routes.post("/permutacion") 
-def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), response_model=PermutacionResponse):
-    try:
-        return permutacion_case.generar_permutaciones(db, permutacion)
-    
-    except ValueError as ve:
-        return JSONResponse(status_code=400, content={"error": str(ve)})
-    
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), 
+    response_model=PermutacionResponse, payload=Depends(AuthService.validar_token)):
+
+    return permutacion_case.generar_permutaciones(db, permutacion, payload["user_id"])
+
 
 @Permutacion_routes.post("/permutacion_dolar") 
-def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), response_model=PermutacionResponse):
-    try:
-        return permutacion_case.permutar_dolar(db, permutacion)
+def realizar_permutacion(permutacion: PermutacionCreate, db: Session = Depends(get_db), 
+    response_model=PermutacionResponse, payload=Depends(AuthService.validar_token)):
 
-    except ValueError as ve:
-        return JSONResponse(status_code=400, content={"error": str(ve)})
-    
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+    return permutacion_case.permutar_dolar(db, permutacion, payload["user_id"])

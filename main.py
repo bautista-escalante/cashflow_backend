@@ -22,4 +22,3 @@ app.include_router(usuario_router)
 @app.get("/")
 def root():
     return {"mensaje": "API funcionando"}
-

@@ -11,10 +11,11 @@ from core.models.Movimiento import Movimiento
 
 class PermutacionCase:
 
-    def generar_permutaciones(self, db:Session, permutacion: PermutacionCreate):
+    def generar_permutaciones(self, db:Session, permutacion: PermutacionCreate, id_usuario):
 
         origen = db.query(Plataforma).filter(
-            Plataforma.id == permutacion.plataforma_origen_id
+            Plataforma.id == permutacion.plataforma_origen_id,
+            Plataforma.id_usuario == id_usuario
         ).first()
 
         destino = db.query(Plataforma).filter(
@@ -26,31 +27,36 @@ class PermutacionCase:
         origen.saldo -= permutacion.monto
         destino.saldo += permutacion.monto
 
-        db.add(Movimiento(
+        movimiento_db = Movimiento(
             tipo=permutacion.tipo,
             monto=permutacion.monto,
             fecha=date.today(),
             descripcion=f"cambio de {origen.nombre} a {destino.nombre}",
             plataforma_origen_id=origen.id,
-            plataforma_destino_id=destino.id
-        ))
-
+            plataforma_destino_id=destino.id,
+            usuario_id = id_usuario
+        )
+        print(movimiento_db.__dict__)
+        db.add(movimiento_db)
         db.commit()
+        db.refresh(movimiento_db)
 
-        return permutacion
+        return PermutacionResponse.model_validate(movimiento_db)
         
-    def permutar_dolar(self, db:Session, permutacion: PermutacionCreate):
+    def permutar_dolar(self, db:Session, permutacion: PermutacionCreate, id_usuario):
         origen = db.query(Plataforma).filter(
-            Plataforma.id == permutacion.plataforma_origen_id
+            Plataforma.id == permutacion.plataforma_origen_id,
+            Plataforma.id_usuario == id_usuario
         ).first()
 
         destino = db.query(Plataforma).filter(
-            Plataforma.id == permutacion.plataforma_destino_id
+            Plataforma.id == permutacion.plataforma_destino_id,
+            Plataforma.id_usuario == id_usuario
         ).first()
-        
+
         movimiento = "compra" if destino.nombre == "dolares" else "venta"
         dolares = requests.get("https://dolarapi.com/v1/dolares/blue").json()
- 
+
         if movimiento == "compra":
             MovimientoValidator.validar_permutacion_dolar(origen, destino, permutacion, dolares["venta"], movimiento)
 
@@ -62,15 +68,20 @@ class PermutacionCase:
 
             origen.saldo -= permutacion.monto 
             destino.saldo += permutacion.monto * dolares["compra"]
+    
 
-        db.add(Movimiento(
+        movimiento_obj = Movimiento(
             tipo=permutacion.tipo,
             monto=permutacion.monto,
             fecha= date.today(),
             descripcion=f"{movimiento} de {origen.nombre} a {destino.nombre} a razon de {dolares['venta'] if movimiento == 'compra' else dolares['compra']} cada dólar",
             plataforma_origen_id=origen.id,
-            plataforma_destino_id=destino.id
-        ))
+            plataforma_destino_id=destino.id,
+            usuario_id = id_usuario
+        )
+        print(movimiento_obj)
+
+        db.add(movimiento_obj)
 
         db.commit()
 
@@ -78,8 +89,9 @@ class PermutacionCase:
             id=0,
             tipo=permutacion.tipo,
             monto=permutacion.monto,
-            fecha=permutacion.fecha,
+            fecha=date.today(),
             plataforma_origen_id=permutacion.plataforma_origen_id,
             plataforma_destino_id=permutacion.plataforma_destino_id,
-            valor_cambio=dolares["venta"] if movimiento == "compra" else dolares["compra"]
+            valor_cambio=dolares["venta"] if movimiento == "compra" else dolares["compra"],
+            usuario_id = id_usuario
         )

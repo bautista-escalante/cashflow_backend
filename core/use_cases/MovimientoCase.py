@@ -1,18 +1,24 @@
 from sqlalchemy.orm import Session
 from itertools import groupby
 from datetime import date
+from fastapi import HTTPException
 
 from core.models.Movimiento import Movimiento
 from api.schemas.MovimientoSchema import MovimientoCreate
 from core.validators.MovimientoValidator import MovimientoValidator
 from core.models.Plataforma import Plataforma
+from api.schemas.MovimientoSchema import MovimientoResponse
 
 
 class movimientoCase:
 
-    def agregar_movimiento(self, db: Session, movimiento: MovimientoCreate):
+    def agregar_movimiento(self, db: Session, movimiento: MovimientoCreate, id_usuario):
         
-        plataforma = db.query(Plataforma).filter(Plataforma.id == movimiento.plataforma_id).first()
+        plataforma = db.query(Plataforma).filter(
+            Plataforma.id == movimiento.plataforma_id, 
+            Plataforma.id_usuario == id_usuario
+            ).first()
+
         MovimientoValidator.validar_movimiento(movimiento, plataforma)
 
         nuevo_movimiento = Movimiento(
@@ -21,32 +27,55 @@ class movimientoCase:
             fecha=date.today(),
             descripcion=movimiento.descripcion,
             categoria=movimiento.categoria,
-            plataforma_id=movimiento.plataforma_id
+            plataforma_id=movimiento.plataforma_id,
+            usuario_id = id_usuario
         )
 
         db.add(nuevo_movimiento)
         db.commit()
         db.refresh(nuevo_movimiento)
 
-        return nuevo_movimiento
+        return MovimientoResponse.model_validate(nuevo_movimiento)
 
-    def obtener_movimientos(self, db: Session, tipo: str):
+    def obtener_movimientos(self, db: Session, tipo: str, id_usuario):
+
+        if not tipo in ["gasto", "permutacion", "ingreso", "todos"]:
+            raise HTTPException(status_code=400, detail="tipo de movimiento erroneo")
+
         if tipo == "todos":
-            return db.query(Movimiento).all()
+            movimiento_db = db.query(Movimiento).filter(
+                Movimiento.usuario_id == id_usuario
+                ).all()
+
         else:
-            return db.query(Movimiento).filter(Movimiento.tipo == tipo).all()
+            movimiento_db = db.query(Movimiento).filter(
+                Movimiento.tipo == tipo, 
+                Movimiento.usuario_id == id_usuario
+                ).all()
 
-    def get_movimiento_by_id(self, db: Session, movimiento_id: int):
-        return db.query(Movimiento).filter(Movimiento.id == movimiento_id).first()
+        if not movimiento_db:
+            raise HTTPException(status_code=404, detail="no hay movimientos")
 
-    def delete_movimiento(self, db: Session, movimiento_id: int):
-        movimiento = self.get_movimiento_by_id(db, movimiento_id)
-        if movimiento:
-            db.delete(movimiento)
-            db.commit()
+        return MovimientoResponse.model_validate(movimiento_db)
 
-    def obtener_evolucion(self, db: Session):
-        movimientos = db.query(Movimiento).order_by(Movimiento.fecha).all()
+    def delete_movimiento(self, db: Session, movimiento_id: int, id_usuario):
+        movimiento_db = db.query(Movimiento).filter(
+            Movimiento.id == movimiento_id,
+            Movimiento.usuario_id == id_usuario
+            ).first()
+
+        if not movimiento_db:
+            raise HTTPException(status_code=404, detail="no hay movimientos")
+        
+        db.delete(movimiento_db)
+        db.commit()
+
+    def obtener_evolucion(self, db: Session, usuario_id):
+        movimientos = db.query(Movimiento).filter(
+            Movimiento.usuario_id == usuario_id).order_by(
+            Movimiento.fecha
+            ).all()
+    
         evolucion = []
         saldo_acumulado = 0
 
