@@ -5,11 +5,12 @@ from api.routes.Movimiento_routes import Movimiento_routes
 from api.routes.Plataforma_routes import plataforma_routes
 from api.routes.permutacion_routes import Permutacion_routes
 from api.routes.usuario_routes import usuario_router
-
+from fastapi.exceptions import RequestValidationError
 
 from infrastructure.database.db import engine, Base
 from core.models.Plataforma import Plataforma
 from core.models.Movimiento import Movimiento
+from core.exceptions import validation_exception_handler
 
 #Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
@@ -20,6 +21,9 @@ origins = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
 ]
+
+
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
