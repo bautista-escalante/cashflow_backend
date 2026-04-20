@@ -10,7 +10,7 @@ from infrastructure.service.AuthService import AuthService
 
 
 permutacion_case = PermutacionCase()
-Permutacion_routes = APIRouter()
+Permutacion_routes = APIRouter(prefix="/movimientos", tags=["movimientos"])
 
 # realizar una permutacion entre plataformas
 @Permutacion_routes.post("/permutacion") 

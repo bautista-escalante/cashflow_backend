@@ -10,7 +10,6 @@ from infrastructure.service.AuthService import AuthService
 
 usuario_router = APIRouter(prefix="/usuarios", tags=["usuarios"])
 usuario_case = UsuarioCase()
-dependencies=[Depends(AuthService.validar_token)]
 
 @usuario_router.post("/", response_model=UsuarioResponse)
 def crear_usuario(usuario: UsuarioCreate, db: Session = Depends(get_db)):

@@ -16,16 +16,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-app.include_router(Movimiento_routes)
-app.include_router(plataforma_routes)
-app.include_router(Permutacion_routes)
-app.include_router(usuario_router)
-
-@app.get("/")
-def root():
-    return {"mensaje": "API funcionando"}
-
-
 origins = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
@@ -38,3 +28,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(Movimiento_routes)
+app.include_router(plataforma_routes)
+app.include_router(Permutacion_routes)
+app.include_router(usuario_router)
+
+@app.get("/")
+def root():
+    return {"mensaje": "API funcionando"}
+
