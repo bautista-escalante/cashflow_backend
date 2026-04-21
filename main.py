@@ -17,17 +17,18 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-""" origins = [
-    "http://localhost:4200",
-    "http://127.0.0.1:4200",
-] """
+origins = [
+    "https://cashflow-frontend-eight.vercel.app",
+    "capacitor://localhost",
+    "http://localhost",
+]
 
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
