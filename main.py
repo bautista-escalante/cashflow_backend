@@ -20,7 +20,7 @@ app = FastAPI()
 origins = [
     "https://cashflow-frontend-eight.vercel.app",
     "capacitor://localhost",
-    "http://localhost",
+    "http://localhost:4200",
 ]
 
 
