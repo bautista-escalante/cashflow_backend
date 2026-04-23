@@ -19,8 +19,10 @@ app = FastAPI()
 
 origins = [
     "https://cashflow-frontend-eight.vercel.app",
+    "https://cashflow-pi-three.vercel.app",
     "capacitor://localhost",
     "http://localhost:4200",
+    "http://127.0.0.1:4200",
 ]
 
 
@@ -29,7 +31,7 @@ app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
