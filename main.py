@@ -12,7 +12,7 @@ from core.models.Plataforma import Plataforma
 from core.models.Movimiento import Movimiento
 from core.exceptions import validation_exception_handler
 
-#Base.metadata.drop_all(bind=engine)
+Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -24,7 +24,6 @@ origins = [
     "http://localhost:4200",
     "http://127.0.0.1:4200",
 ]
-
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
