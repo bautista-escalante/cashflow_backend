@@ -30,7 +30,7 @@ class MovimientoValidator():
         if origen.id == destino.id:
             raise HTTPException(status_code=400, detail="No se puede permutar a la misma plataforma")
         
-        if origen.nombre != "dolares" and destino.nombre != "dólares":
+        if origen.nombre != "dólares" and destino.nombre != "dólares":
             raise HTTPException(status_code=400, detail="en esta ruta solo se pueden permutar dólares")
         
         if movimiento == "compra" and origen.saldo < permutacion.monto * cambio_dolar:
