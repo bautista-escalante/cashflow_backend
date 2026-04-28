@@ -56,7 +56,7 @@ class movimientoCase:
         if not movimiento_db:
             raise HTTPException(status_code=404, detail="no hay movimientos")
 
-        return MovimientoResponse.model_validate(movimiento_db)
+        return [MovimientoResponse.model_validate(m) for m in movimiento_db]
 
     def delete_movimiento(self, db: Session, movimiento_id: int, id_usuario):
         movimiento_db = db.query(Movimiento).filter(

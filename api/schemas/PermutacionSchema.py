@@ -9,7 +9,7 @@ class PermutacionCreate(BaseModel):
     monto: float
     plataforma_origen_id: int
     plataforma_destino_id: int
-
+    
 class PermutacionResponse(PermutacionCreate):
     id: int
     valor_cambio: Optional[float] = None

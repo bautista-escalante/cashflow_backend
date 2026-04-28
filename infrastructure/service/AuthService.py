@@ -34,7 +34,7 @@ class AuthService:
             )
             
         except ExpiredSignatureError:
-            raise HTTPException(status_code=400, detail="Token expirado")
+            raise HTTPException(status_code=401, detail="Token expirado")
 
         except InvalidTokenError:
             raise HTTPException(status_code=400, detail="Token inválido")
