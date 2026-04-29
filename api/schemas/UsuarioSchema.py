@@ -12,6 +12,9 @@ class UsuarioCreate(UsuarioBase):
 class UsuarioAuth(BaseModel):
     email: EmailStr
     clave: str
+    
+class UpdatePassword(BaseModel):
+    clave: str
 
 
 class UsuarioResponse(UsuarioBase):

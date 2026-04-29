@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 
-from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioAuth, UsuarioResponse
+from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioAuth, UsuarioResponse, UpdatePassword
 from infrastructure.database.db import get_db
 from core.models.Usuario import Usuario
 from core.use_cases.UsuarioCase import UsuarioCase
@@ -22,9 +22,9 @@ def obtener_usuario(payload=Depends(AuthService.validar_token), db: Session = De
     return usuario_case.obtener_usuario(payload["user_id"], db)
 
 @usuario_router.put("/", response_model=UsuarioResponse)
-def actualizar_usuario(clave:str, payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
-    
-    return usuario_case.actualizar_usuario(clave, payload["user_id"], db)
+def actualizar_usuario(usuario: UpdatePassword, payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
+
+    return usuario_case.actualizar_usuario(usuario.clave, payload["user_id"], db)
 
 @usuario_router.delete("/")
 def eliminar_usuario(db: Session = Depends(get_db), payload=Depends(AuthService.validar_token)):
