@@ -31,6 +31,12 @@ class movimientoCase:
             usuario_id = id_usuario
         )
 
+        if movimiento.tipo == "gasto":  
+            plataforma.saldo -= movimiento.monto
+            
+        elif movimiento.tipo == "ingreso":
+            plataforma.saldo += movimiento.monto
+            
         db.add(nuevo_movimiento)
         db.commit()
         db.refresh(nuevo_movimiento)
