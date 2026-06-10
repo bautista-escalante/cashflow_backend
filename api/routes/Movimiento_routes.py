@@ -1,8 +1,8 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from fastapi import HTTPException
-from fastapi import Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import extract
+from typing import Optional
 
 from api.schemas.MovimientoSchema import MovimientoCreate, MovimientoResponse
 from core.use_cases.MovimientoCase import movimientoCase
