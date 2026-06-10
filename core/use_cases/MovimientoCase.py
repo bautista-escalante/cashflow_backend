@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session, extract, func
+from sqlalchemy.orm import Session
+from sqlalchemy import extract, func
 from itertools import groupby
 from datetime import date
 from fastapi import HTTPException
