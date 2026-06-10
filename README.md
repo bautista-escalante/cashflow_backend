@@ -20,6 +20,20 @@ La documentación interactiva (Swagger UI) en `https://cashflow-backend-bhya.onr
 
 ---
 
+## levantar la api en local
+
+```
+pip install -r requirements.txt 
+```
+```
+docker-compose up
+```
+
+```
+uvicorn main:app --reload
+```
+
+
 ## 📌 Endpoints
 
 ### 💰 Movimientos

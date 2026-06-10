@@ -4,6 +4,8 @@ from itertools import groupby
 from datetime import date
 from fastapi import HTTPException
 
+import requests
+
 from core.models.Movimiento import Movimiento
 from api.schemas.MovimientoSchema import MovimientoCreate
 from core.validators.MovimientoValidator import MovimientoValidator
@@ -85,11 +87,18 @@ class movimientoCase:
             extract("year", Movimiento.fecha) == anio,
         ).order_by(Movimiento.fecha).all()
 
-        saldo_plataformas = db.query(
-            func.sum(Plataforma.saldo)
-        ).filter(
-            Plataforma.usuario_id == usuario_id
-        ).scalar() or 0
+        plataformas = db.query(Plataforma).filter(
+            Plataforma.id_usuario == usuario_id
+        ).all()
+
+        saldo_plataformas = 0
+        for p in plataformas:
+            print(p.nombre)
+            if(p.nombre != "dolares"):
+                saldo_plataformas += p.saldo
+            else:
+                dolares = requests.get("https://dolarapi.com/v1/dolares/blue").json()
+                saldo_plataformas += p.saldo * dolares["compra"]
 
         evolucion = []
         saldo_acumulado = 0
