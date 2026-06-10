@@ -78,32 +78,32 @@ class movimientoCase:
         db.commit()
 
     
-def obtener_evolucion(self, db: Session, usuario_id, mes, anio):
-    movimientos = db.query(Movimiento).filter(
-        Movimiento.usuario_id == usuario_id,
-        extract("month", Movimiento.fecha) == mes,
-        extract("year", Movimiento.fecha) == anio,
-    ).order_by(Movimiento.fecha).all()
+    def obtener_evolucion(self, db: Session, usuario_id, mes, anio):
+        movimientos = db.query(Movimiento).filter(
+            Movimiento.usuario_id == usuario_id,
+            extract("month", Movimiento.fecha) == mes,
+            extract("year", Movimiento.fecha) == anio,
+        ).order_by(Movimiento.fecha).all()
 
-    saldo_plataformas = db.query(
-        func.sum(Plataforma.saldo)
-    ).filter(
-        Plataforma.usuario_id == usuario_id
-    ).scalar() or 0
+        saldo_plataformas = db.query(
+            func.sum(Plataforma.saldo)
+        ).filter(
+            Plataforma.usuario_id == usuario_id
+        ).scalar() or 0
 
-    evolucion = []
-    saldo_acumulado = 0
+        evolucion = []
+        saldo_acumulado = 0
 
-    for fecha, grupo in groupby(movimientos, key=lambda m: m.fecha):
-        for movimiento in grupo:
-            if movimiento.tipo == "ingreso":
-                saldo_acumulado += movimiento.monto
-            elif movimiento.tipo == "gasto":
-                saldo_acumulado -= movimiento.monto
+        for fecha, grupo in groupby(movimientos, key=lambda m: m.fecha):
+            for movimiento in grupo:
+                if movimiento.tipo == "ingreso":
+                    saldo_acumulado += movimiento.monto
+                elif movimiento.tipo == "gasto":
+                    saldo_acumulado -= movimiento.monto
 
-        evolucion.append({
-            "fecha": fecha,
-            "saldo": saldo_acumulado + saldo_plataformas,
-        })
+            evolucion.append({
+                "fecha": fecha,
+                "saldo": saldo_acumulado + saldo_plataformas,
+            })
 
-    return evolucion
+        return evolucion

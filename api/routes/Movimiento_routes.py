@@ -38,7 +38,7 @@ def obtener_evolucion(payload=Depends(AuthService.validar_token), db: Session = 
     mes: Optional[int] = Query(default=None, ge=1, le=12), anio: Optional[int] = Query(default=None, ge=2000, le=2100),
    ):
 
-    return movimiento_case.obtener_evolucion(db, payload["user_id"]) 
+    return movimiento_case.obtener_evolucion(db, payload["user_id"], mes, anio) 
 
 @Movimiento_routes.delete("/") 
 def eliminar_movimiento(movimiento_id: int,
