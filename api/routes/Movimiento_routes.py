@@ -34,9 +34,11 @@ def obtener_ingresos(payload=Depends(AuthService.validar_token), db: Session = D
     return movimiento_case.obtener_movimientos(db, "ingreso", payload["user_id"])
 
 @Movimiento_routes.get("/evolucion") 
-def obtener_evolucion(payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
+def obtener_evolucion(payload=Depends(AuthService.validar_token), db: Session = Depends(get_db),  
+    mes: Optional[int] = Query(default=None, ge=1, le=12), anio: Optional[int] = Query(default=None, ge=2000, le=2100),
+   ):
 
-    return movimiento_case.obtener_evolucion(db, payload["user_id"])
+    return movimiento_case.obtener_evolucion(db, payload["user_id"]) 
 
 @Movimiento_routes.delete("/") 
 def eliminar_movimiento(movimiento_id: int,

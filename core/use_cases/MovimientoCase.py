@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, extract, func
 from itertools import groupby
 from datetime import date
 from fastapi import HTTPException
@@ -76,25 +76,33 @@ class movimientoCase:
         db.delete(movimiento_db)
         db.commit()
 
-    def obtener_evolucion(self, db: Session, usuario_id):
-        movimientos = db.query(Movimiento).filter(
-            Movimiento.usuario_id == usuario_id).order_by(
-            Movimiento.fecha
-            ).all()
     
-        evolucion = []
-        saldo_acumulado = 0
+def obtener_evolucion(self, db: Session, usuario_id, mes, anio):
+    movimientos = db.query(Movimiento).filter(
+        Movimiento.usuario_id == usuario_id,
+        extract("month", Movimiento.fecha) == mes,
+        extract("year", Movimiento.fecha) == anio,
+    ).order_by(Movimiento.fecha).all()
 
-        for fecha, grupo in groupby(movimientos, key=lambda m: m.fecha):
-            for movimiento in grupo:
-                if movimiento.tipo == "ingreso":
-                    saldo_acumulado += movimiento.monto
-                elif movimiento.tipo == "gasto":
-                    saldo_acumulado -= movimiento.monto
+    saldo_plataformas = db.query(
+        func.sum(Plataforma.saldo)
+    ).filter(
+        Plataforma.usuario_id == usuario_id
+    ).scalar() or 0
 
-            evolucion.append({
-                "fecha": fecha,
-                "saldo": saldo_acumulado
-            })
+    evolucion = []
+    saldo_acumulado = 0
 
-        return evolucion
+    for fecha, grupo in groupby(movimientos, key=lambda m: m.fecha):
+        for movimiento in grupo:
+            if movimiento.tipo == "ingreso":
+                saldo_acumulado += movimiento.monto
+            elif movimiento.tipo == "gasto":
+                saldo_acumulado -= movimiento.monto
+
+        evolucion.append({
+            "fecha": fecha,
+            "saldo": saldo_acumulado + saldo_plataformas,
+        })
+
+    return evolucion
