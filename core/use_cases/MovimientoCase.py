@@ -16,7 +16,7 @@ from api.schemas.MovimientoSchema import MovimientoResponse
 class movimientoCase:
 
     def agregar_movimiento(self, db: Session, movimiento: MovimientoCreate, id_usuario):
-        
+
         plataforma = db.query(Plataforma).filter(
             Plataforma.id == movimiento.plataforma_id, 
             Plataforma.id_usuario == id_usuario
