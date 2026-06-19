@@ -2,9 +2,10 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import extract
-from typing import Optional
+from typing import Optional, Union
 
 from api.schemas.MovimientoSchema import MovimientoCreate, MovimientoResponse
+from api.schemas.PermutacionSchema import PermutacionResponse
 from core.use_cases.MovimientoCase import movimientoCase
 from infrastructure.database.db import get_db
 from infrastructure.service.AuthService import AuthService
@@ -18,7 +19,7 @@ def agregar_movimiento( movimiento: MovimientoCreate,
 
     return movimiento_case.agregar_movimiento(db, movimiento, payload["user_id"])
 
-@Movimiento_routes.get("/", response_model=list[MovimientoResponse]) # trar todos los movimientos
+@Movimiento_routes.get("/", response_model=list[Union[MovimientoResponse, PermutacionResponse]]) # trar todos los movimientos
 def obtener_movimientos(payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
 
     return movimiento_case.obtener_movimientos(db, "todos", payload["user_id"])

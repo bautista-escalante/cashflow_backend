@@ -11,6 +11,7 @@ from api.schemas.MovimientoSchema import MovimientoCreate
 from core.validators.MovimientoValidator import MovimientoValidator
 from core.models.Plataforma import Plataforma
 from api.schemas.MovimientoSchema import MovimientoResponse
+from api.schemas.PermutacionSchema import PermutacionResponse
 
 
 class movimientoCase:
@@ -65,7 +66,14 @@ class movimientoCase:
         if not movimiento_db:
             raise HTTPException(status_code=404, detail="no hay movimientos")
 
-        return [MovimientoResponse.model_validate(m) for m in movimiento_db]
+        movimientos_validados = []
+        for m in movimiento_db:
+            if(m.tipo != "permutacion"):
+                movimientos_validados.append(MovimientoResponse.model_validate(m))
+            else:
+                movimientos_validados.append(PermutacionResponse.model_validate(m))
+
+        return movimientos_validados
 
     def delete_movimiento(self, db: Session, movimiento_id: int, id_usuario):
         movimiento_db = db.query(Movimiento).filter(
