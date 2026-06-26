@@ -4,6 +4,7 @@ from itertools import groupby
 from datetime import date
 from fastapi import HTTPException
 
+import datetime
 import requests
 
 from core.models.Movimiento import Movimiento
@@ -74,6 +75,25 @@ class movimientoCase:
                 movimientos_validados.append(PermutacionResponse.model_validate(m))
 
         return movimientos_validados
+
+    def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, id_usuario: int) -> list[MovimientoResponse]:
+
+        if not (1 <= mes <= 12):
+            raise HTTPException(status_code=400, detail="mes no válido")
+        if anio < 2000:
+            raise HTTPException(status_code=400, detail="año no válido")
+
+        movimientos = db.query(Movimiento).filter(
+            Movimiento.usuario_id == id_usuario,
+            Movimiento.categoria == categoria,
+            extract("month", Movimiento.fecha) == mes,
+            extract("year", Movimiento.fecha) == anio,
+        ).all()
+
+        if not movimientos:
+            raise HTTPException(status_code=404, detail="sin movimientos para ese período")
+
+        return [MovimientoResponse.model_validate(m) for m in movimientos]
 
     def delete_movimiento(self, db: Session, movimiento_id: int, id_usuario):
         movimiento_db = db.query(Movimiento).filter(
