@@ -91,7 +91,9 @@ class movimientoCase:
         ).all()
 
         if not movimientos:
-            raise HTTPException(status_code=404, detail="sin movimientos para ese período")
+            # si noy movimietos solamente devolvemos una lista vacia
+            return []
+            #raise HTTPException(status_code=404, detail="sin movimientos para ese período")
 
         return [MovimientoResponse.model_validate(m) for m in movimientos]
 
