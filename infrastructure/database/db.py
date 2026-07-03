@@ -6,8 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-engine = create_engine(os.getenv("DATABASE_URL"))
-#engine = create_engine("postgresql://postgres:1234@localhost:5433/cashflow")
+engine = create_engine("postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@localhost:{PORT}/{POSTGRES_DB}")
 
 SessionLocal = sessionmaker(bind=engine)
 
