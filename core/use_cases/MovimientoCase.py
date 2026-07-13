@@ -76,19 +76,33 @@ class movimientoCase:
 
         return movimientos_validados
 
-    def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, id_usuario: int) -> list[MovimientoResponse]:
+    def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, incluir_dolares: bool, id_usuario: int) -> list[MovimientoResponse]:
 
         if not (1 <= mes <= 12):
             raise HTTPException(status_code=400, detail="mes no válido")
         if anio < 2000:
             raise HTTPException(status_code=400, detail="año no válido")
 
-        movimientos = db.query(Movimiento).filter(
-            Movimiento.usuario_id == id_usuario,
-            Movimiento.categoria == categoria,
-            extract("month", Movimiento.fecha) == mes,
-            extract("year", Movimiento.fecha) == anio,
-        ).all()
+        if (incluir_dolares):
+            movimientos = db.query(Movimiento).filter(
+                Movimiento.usuario_id == id_usuario,
+                Movimiento.categoria == categoria,
+                extract("month", Movimiento.fecha) == mes,
+                extract("year", Movimiento.fecha) == anio,
+            ).all()
+        else:
+            movimientos = (
+                db.query(Movimiento).join(
+                    Plataforma, 
+                    Movimiento.plataforma_id == Plataforma.id
+                    ).filter(
+                    Movimiento.usuario_id == id_usuario,
+                    Movimiento.categoria == categoria,
+                    Plataforma.nombre != "dolares",
+                    extract("month", Movimiento.fecha) == mes,
+                    extract("year", Movimiento.fecha) == anio,
+                ).all()
+            )
 
         if not movimientos:
             # si noy movimietos solamente devolvemos una lista vacia
@@ -123,7 +137,6 @@ class movimientoCase:
 
         saldo_plataformas = 0
         for p in plataformas:
-            print(p.nombre)
             if(p.nombre != "dolares"):
                 saldo_plataformas += p.saldo
             else:

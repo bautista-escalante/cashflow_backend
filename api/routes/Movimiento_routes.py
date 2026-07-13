@@ -27,9 +27,9 @@ def obtener_movimientos(payload=Depends(AuthService.validar_token), db: Session 
 
 @Movimiento_routes.get("/gastos", response_model=list[MovimientoResponse])
 def obtener_gastos( 
-    mes: int, anio: int, categoria: str, payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
+    mes: int, anio: int, categoria: str, incluir_dolares:bool, payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
     
-    return movimiento_case.obtener_gastos(db, anio, mes, categoria, payload["user_id"])
+    return movimiento_case.obtener_gastos(db, anio, mes, categoria, incluir_dolares, payload["user_id"])
 
 @Movimiento_routes.get("/ingresos", response_model=list[MovimientoResponse])
 def obtener_ingresos(payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
