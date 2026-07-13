@@ -83,26 +83,13 @@ class movimientoCase:
         if anio < 2000:
             raise HTTPException(status_code=400, detail="año no válido")
 
-        if (incluir_dolares):
-            movimientos = db.query(Movimiento).filter(
-                Movimiento.usuario_id == id_usuario,
-                Movimiento.categoria == categoria,
-                extract("month", Movimiento.fecha) == mes,
-                extract("year", Movimiento.fecha) == anio,
-            ).all()
-        else:
-            movimientos = (
-                db.query(Movimiento).join(
-                    Plataforma, 
-                    Movimiento.plataforma_id == Plataforma.id
-                    ).filter(
-                    Movimiento.usuario_id == id_usuario,
-                    Movimiento.categoria == categoria,
-                    Plataforma.nombre != "dolares",
-                    extract("month", Movimiento.fecha) == mes,
-                    extract("year", Movimiento.fecha) == anio,
-                ).all()
-            )
+        movimientos = db.query(Movimiento).filter(
+            Movimiento.usuario_id == id_usuario,
+            Movimiento.categoria == categoria,
+            extract("month", Movimiento.fecha) == mes,
+            extract("year", Movimiento.fecha) == anio,
+        ).all()
+            
 
         if not movimientos:
             # si noy movimietos solamente devolvemos una lista vacia
@@ -124,12 +111,19 @@ class movimientoCase:
         db.commit()
 
     
-    def obtener_evolucion(self, db: Session, usuario_id, mes, anio):
-        movimientos = db.query(Movimiento).filter(
+    def obtener_evolucion(self, db: Session, usuario_id, mes, anio, incluir_dolares):
+        query = db.query(Movimiento).join(
+            Plataforma, Movimiento.plataforma_id == Plataforma.id
+        ).filter(
             Movimiento.usuario_id == usuario_id,
             extract("month", Movimiento.fecha) == mes,
             extract("year", Movimiento.fecha) == anio,
-        ).order_by(Movimiento.fecha).all()
+        )
+
+        if not incluir_dolares:
+            query = query.filter(Plataforma.nombre != "dolares")
+
+        movimientos = query.order_by(Movimiento.fecha).all()
 
         plataformas = db.query(Plataforma).filter(
             Plataforma.id_usuario == usuario_id
@@ -137,9 +131,9 @@ class movimientoCase:
 
         saldo_plataformas = 0
         for p in plataformas:
-            if(p.nombre != "dolares"):
+            if p.nombre != "dolares":
                 saldo_plataformas += p.saldo
-            else:
+            elif incluir_dolares:
                 dolares = requests.get("https://dolarapi.com/v1/dolares/blue").json()
                 saldo_plataformas += p.saldo * dolares["compra"]
 
