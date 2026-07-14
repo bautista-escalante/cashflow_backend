@@ -76,7 +76,7 @@ class movimientoCase:
 
         return movimientos_validados
 
-    def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, incluir_dolares: bool, id_usuario: int) -> list[MovimientoResponse]:
+    def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, id_usuario: int) -> list[MovimientoResponse]:
 
         if not (1 <= mes <= 12):
             raise HTTPException(status_code=400, detail="mes no válido")
