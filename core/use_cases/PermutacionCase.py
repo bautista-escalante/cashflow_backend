@@ -89,9 +89,9 @@ class PermutacionCase:
             id=0,
             tipo=permutacion.tipo,
             monto=permutacion.monto,
+            descripcion = movimiento_obj.descripcion,
             fecha=date.today(),
             plataforma_origen_id=permutacion.plataforma_origen_id,
             plataforma_destino_id=permutacion.plataforma_destino_id,
             valor_cambio=dolares["venta"] if movimiento == "compra" else dolares["compra"],
-            usuario_id = id_usuario
         )
