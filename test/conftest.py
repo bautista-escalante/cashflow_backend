@@ -1,5 +1,5 @@
-import random
 import pytest
+from uuid import uuid4
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -9,9 +9,11 @@ from core.models.Usuario import Usuario
 from core.models.Plataforma import Plataforma
 from core.models.Movimiento import Movimiento
 
-from api.schemas.UsuarioSchema import UsuarioCreate
+from api.schemas.UsuarioSchema import UsuarioCreate, UsuarioResponse
+from api.schemas.PlataformaSchema import PlataformaCreate
 
 from core.use_cases.UsuarioCase import UsuarioCase
+from core.use_cases.PlataformaCase import PlataformaCase
 
 engine = create_engine(
     "sqlite:///:memory:",
@@ -33,13 +35,26 @@ def db():
 
 @pytest.fixture
 def usuario_prueba(db):
-    num = random.randint(1, 1000)
+    uuid = uuid4().hex
     usuario_case = UsuarioCase()
     usuario_prueba = UsuarioCreate(
-        nombre=f"Usuario fixture {num}",
-        email=f"usuario.{num}@example.com",
+        nombre=f"Usuario fixture {uuid}",
+        email=f"usuario.{uuid}@example.com",
         clave="clave_de_prueba"
     )
     usuario_prueba = usuario_case.crear_usuario(usuario_prueba, db)
 
     return usuario_prueba
+
+
+@pytest.fixture
+def plataforma_prueba(db, usuario_prueba: UsuarioResponse):
+
+    plataforma_case = PlataformaCase()
+    plataforma_prueba = PlataformaCreate(
+        nombre="efectivo",
+        saldo=100.0
+    )
+    plataforma_prueba = plataforma_case.crear_plataforma(db, plataforma_prueba, usuario_prueba.id)
+
+    return plataforma_prueba
