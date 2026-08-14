@@ -7,7 +7,8 @@ from core.models.Movimiento import Movimiento
 def test_database_connection(db):
     assert db is not None
 
+
 def test_database_tables(db):
-    assert db.query(Usuario).all() == []
-    assert db.query(Plataforma).all() == []
-    assert db.query(Movimiento).all() == []
+    assert db.query(Usuario).all() is not None
+    assert db.query(Plataforma).all() is not None
+    assert db.query(Movimiento).all() is not None

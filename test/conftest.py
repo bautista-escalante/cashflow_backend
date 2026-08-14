@@ -1,9 +1,13 @@
 import pytest
 from uuid import uuid4
+from fastapi.testclient import TestClient
 
+from main import app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from infrastructure.database.db import Base
+from sqlalchemy.pool import StaticPool
+
+from infrastructure.database.db import Base, get_db
 
 from core.models.Usuario import Usuario
 from core.models.Plataforma import Plataforma
@@ -15,9 +19,11 @@ from api.schemas.PlataformaSchema import PlataformaCreate
 from core.use_cases.UsuarioCase import UsuarioCase
 from core.use_cases.PlataformaCase import PlataformaCase
 
+
 engine = create_engine(
     "sqlite:///:memory:",
-    connect_args={"check_same_thread": False}
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -58,3 +64,16 @@ def plataforma_prueba(db, usuario_prueba: UsuarioResponse):
     plataforma_prueba = plataforma_case.crear_plataforma(db, plataforma_prueba, usuario_prueba.id)
 
     return plataforma_prueba
+
+@pytest.fixture
+def client(db):
+    
+    def override_get_db():
+        yield db
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as client:
+        yield client
+
+    app.dependency_overrides.clear()
