@@ -19,11 +19,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-    - name: Check DATABASE_URL
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      run: |
-        python -c "import os; url=os.getenv('DATABASE_URL'); print('DATABASE_URL existe:', bool(url)); print('Longitud:', len(url) if url else 0); print('Inicio:', url[:20] if url else 'NONE')"
+      - name: Check DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python -c "import os; url=os.getenv('DATABASE_URL'); print('DATABASE_URL existe:', bool(url)); print('Longitud:', len(url) if url else 0); print('Inicio:', url[:20] if url else 'NONE')"
 
       - name: Run tests
         env:
