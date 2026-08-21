@@ -18,11 +18,6 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-@app.middleware("http")
-async def log_origin(request, call_next):
-    print("ORIGIN RECIBIDO:", request.headers.get("origin"))
-    response = await call_next(request)
-    return response
 
 origins = [
     "https://cashflow-frontend-eight.vercel.app",
@@ -42,6 +37,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def log_origin(request, call_next):
+    print("ORIGIN RECIBIDO:", request.headers.get("origin"))
+    response = await call_next(request)
+    return response
 
 app.include_router(Movimiento_routes)
 app.include_router(plataforma_routes)
