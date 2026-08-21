@@ -1,4 +1,5 @@
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import FastAPI
 
 from api.routes.Movimiento_routes import Movimiento_routes
@@ -16,6 +17,12 @@ from core.exceptions import validation_exception_handler
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+@app.middleware("http")
+async def log_origin(request, call_next):
+    print("ORIGIN RECIBIDO:", request.headers.get("origin"))
+    response = await call_next(request)
+    return response
 
 origins = [
     "https://cashflow-frontend-eight.vercel.app",
