@@ -23,6 +23,7 @@ origins = [
     "capacitor://localhost",
     "http://localhost:4200",
     "http://127.0.0.1:4200",
+    "http://localhost",
 ]
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
