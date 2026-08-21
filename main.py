@@ -25,7 +25,7 @@ origins = [
     "capacitor://localhost",
     "http://localhost:4200",
     "http://127.0.0.1:4200",
-    "http://localhost",
+    "https://localhost",
 ]
 
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
@@ -37,12 +37,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.middleware("http")
-async def log_origin(request, call_next):
-    print("ORIGIN RECIBIDO:", request.headers.get("origin"))
-    response = await call_next(request)
-    return response
 
 app.include_router(Movimiento_routes)
 app.include_router(plataforma_routes)
