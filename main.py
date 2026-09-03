@@ -10,6 +10,7 @@ from fastapi.exceptions import RequestValidationError
 
 from core.exceptions import validation_exception_handler
 
+from infrastructure.ai.gemini import generate_gemini_response
 
 app = FastAPI()
 
@@ -40,5 +41,6 @@ app.include_router(usuario_router)
 
 @app.get("/")
 def root():
-    return {"mensaje": "API funcionando"}
+    mensaje = generate_gemini_response("Escribe un saludo corto")
+    return {"mensaje": mensaje}
 
