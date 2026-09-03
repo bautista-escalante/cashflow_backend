@@ -6,6 +6,8 @@ from api.routes.Movimiento_routes import Movimiento_routes
 from api.routes.Plataforma_routes import plataforma_routes
 from api.routes.permutacion_routes import Permutacion_routes
 from api.routes.usuario_routes import usuario_router
+from api.routes.usuario_routes import usuario_router
+from api.routes.gemini_routes import gemini_routes
 from fastapi.exceptions import RequestValidationError
 
 from core.exceptions import validation_exception_handler
@@ -38,9 +40,9 @@ app.include_router(Movimiento_routes)
 app.include_router(plataforma_routes)
 app.include_router(Permutacion_routes)
 app.include_router(usuario_router)
+app.include_router(gemini_routes)
 
 @app.get("/")
 def root():
-    mensaje = generate_gemini_response("Escribe un saludo corto")
-    return {"mensaje": mensaje}
+    return {"message": "Bienvenido a la API de CashFlow, visita /docs para ver la documentación de la API."}
 
