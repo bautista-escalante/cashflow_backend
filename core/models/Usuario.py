@@ -11,7 +11,6 @@ class Usuario(Base):
     clave = Column(String(100))
     email = Column(String(100), unique=True, index=True)
     fecha = Column(DateTime, default=datetime.utcnow)
-    fecha2 = Column(DateTime, default=datetime.utcnow)
     eliminado_el = Column(DateTime, nullable=True)
     
     def __init__(self, id: int, nombre: str, clave: str, email: str):
