@@ -21,9 +21,9 @@ def agregar_movimiento( movimiento: MovimientoCreate,
     return movimiento_case.agregar_movimiento(db, movimiento, payload["user_id"])
 
 @Movimiento_routes.get("/", response_model=list[Union[MovimientoResponse, PermutacionResponse]]) # trar todos los movimientos
-def obtener_movimientos(payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
+def obtener_movimientos(mes: int, anio: int, payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
 
-    return movimiento_case.obtener_movimientos(db, "todos", payload["user_id"])
+    return movimiento_case.obtener_movimientos(db, "todos", payload["user_id"],anio, mes,)
 
 @Movimiento_routes.get("/gastos", response_model=list[MovimientoResponse])
 def obtener_gastos( 
@@ -42,6 +42,14 @@ def obtener_evolucion(payload=Depends(AuthService.validar_token), db: Session = 
    ):
 
     return movimiento_case.obtener_evolucion(db, payload["user_id"], mes, anio, incluir_dolares) 
+
+
+@Movimiento_routes.put("/") 
+def modificar_movimiento(movimiento_id: int, descripcion: str,
+    payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
+
+    movimiento_case.modificar_movimiento(db, movimiento_id, descripcion, payload["user_id"])
+    return JSONResponse({"mensaje": "Movimiento modificado"}, status_code=200)
 
 @Movimiento_routes.delete("/") 
 def eliminar_movimiento(movimiento_id: int,

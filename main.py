@@ -7,7 +7,6 @@ from api.routes.Plataforma_routes import plataforma_routes
 from api.routes.permutacion_routes import Permutacion_routes
 from api.routes.usuario_routes import usuario_router
 from api.routes.usuario_routes import usuario_router
-from api.routes.gemini_routes import gemini_routes
 from fastapi.exceptions import RequestValidationError
 
 from infrastructure.database.db import engine, Base
@@ -45,7 +44,6 @@ app.include_router(Movimiento_routes)
 app.include_router(plataforma_routes)
 app.include_router(Permutacion_routes)
 app.include_router(usuario_router)
-app.include_router(gemini_routes)
 
 @app.get("/")
 def root():

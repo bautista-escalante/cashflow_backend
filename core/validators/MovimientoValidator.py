@@ -57,3 +57,10 @@ class MovimientoValidator():
         
         if movimiento.monto <= 0:
             raise HTTPException(status_code=400, detail="El monto no puede ser negativo o cero")
+
+    def validar_fecha(mes: Optional[int], anio: Optional[int]):
+        if mes is not None and (mes < 1 or mes > 12):
+            raise HTTPException(status_code=400, detail="Mes inválido")
+        
+        if anio is not None and (anio < 2000 or anio > 2100):
+            raise HTTPException(status_code=400, detail="Año inválido")

@@ -55,8 +55,8 @@ class TestObtenerMovimientos:
         )
         movimiento_case.agregar_movimiento(db, movimiento, id_usuario=usuario_prueba.id)
 
-        movimientos = movimiento_case.obtener_movimientos(db, "gasto", id_usuario=usuario_prueba.id)
-
+        movimientos = movimiento_case.obtener_movimientos(db, "gasto", id_usuario=usuario_prueba.id, anio=datetime.date.today().year, mes=datetime.date.today().month)
+ 
         assert len(movimientos) > 0
 
 class TestObtenerGastos:

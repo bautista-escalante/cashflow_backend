@@ -48,20 +48,26 @@ class movimientoCase:
 
         return MovimientoResponse.model_validate(nuevo_movimiento)
 
-    def obtener_movimientos(self, db: Session, tipo: str, id_usuario):
+    def obtener_movimientos(self, db: Session, tipo: str, id_usuario: int, anio: int, mes: int):
+
+        MovimientoValidator.validar_fecha(mes, anio)
 
         if not tipo in ["gasto", "permutacion", "ingreso", "todos"]:
             raise HTTPException(status_code=400, detail="tipo de movimiento erroneo")
 
         if tipo == "todos":
             movimiento_db = db.query(Movimiento).filter(
-                Movimiento.usuario_id == id_usuario
+                Movimiento.usuario_id == id_usuario,
+                extract("month", Movimiento.fecha) == mes,
+                extract("year", Movimiento.fecha) == anio,
                 ).all()
 
         else:
             movimiento_db = db.query(Movimiento).filter(
                 Movimiento.tipo == tipo, 
-                Movimiento.usuario_id == id_usuario
+                Movimiento.usuario_id == id_usuario,
+                extract("month", Movimiento.fecha) == mes,
+                extract("year", Movimiento.fecha) == anio,
                 ).all()
 
         if not movimiento_db:
@@ -78,10 +84,7 @@ class movimientoCase:
 
     def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, id_usuario: int) -> list[MovimientoResponse]:
 
-        if not (1 <= mes <= 12):
-            raise HTTPException(status_code=400, detail="mes no válido")
-        if anio < 2000:
-            raise HTTPException(status_code=400, detail="año no válido")
+        MovimientoValidator.validar_fecha(mes, anio)
 
         movimientos = db.query(Movimiento).filter(
             Movimiento.usuario_id == id_usuario,
@@ -110,7 +113,19 @@ class movimientoCase:
         db.delete(movimiento_db)
         db.commit()
 
-    
+    def modificar_movimiento(self, db: Session, movimiento_id: int, descripcion: str, id_usuario: int):
+        movimiento_db = db.query(Movimiento).filter(
+            Movimiento.id == movimiento_id,
+            Movimiento.usuario_id == id_usuario
+            ).first()
+
+        if not movimiento_db:
+            raise HTTPException(status_code=404, detail="no hay movimientos")
+
+        movimiento_db.descripcion = descripcion
+        db.commit()
+
+
     def obtener_evolucion(self, db: Session, usuario_id, mes, anio, incluir_dolares):
         query = db.query(Movimiento).join(
             Plataforma, Movimiento.plataforma_id == Plataforma.id
