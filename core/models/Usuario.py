@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, DateTime
-from datetime import datetime
 from infrastructure.database.db import Base
 
 class Usuario(Base):
@@ -10,7 +9,7 @@ class Usuario(Base):
     nombre = Column(String(100))
     clave = Column(String(100))
     email = Column(String(100), unique=True, index=True)
-    fecha = Column(DateTime, default=datetime.utcnow)
+    fecha = Column(DateTime)
     eliminado_el = Column(DateTime, nullable=True)
     
     def __init__(self, id: int, nombre: str, clave: str, email: str):

@@ -10,9 +10,14 @@ from api.routes.usuario_routes import usuario_router
 from api.routes.gemini_routes import gemini_routes
 from fastapi.exceptions import RequestValidationError
 
+from infrastructure.database.db import engine, Base
+from core.models.Plataforma import Plataforma
+from core.models.Movimiento import Movimiento
 from core.exceptions import validation_exception_handler
 
-from infrastructure.ai.gemini import generate_gemini_response
+
+#Base.metadata.drop_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
