@@ -71,8 +71,8 @@ class movimientoCase:
                 ).all()
 
         if not movimiento_db:
-            raise HTTPException(status_code=404, detail="no hay movimientos")
-
+            return []  # si no hay movimientos, devolvemos una lista vacía en lugar de lanzar una excepción
+        
         movimientos_validados = []
         for m in movimiento_db:
             if(m.tipo != "permutacion"):
