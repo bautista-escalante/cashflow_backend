@@ -1,211 +1,131 @@
 # 💸 CashFlow Backend
 
-API REST para la gestión y seguimiento de flujo de caja personal o empresarial. Permite registrar movimientos financieros, administrar plataformas de pago y calcular permutaciones entre ellas, ofreciendo una visión clara del estado financiero en todo momento.
+[![CI](https://github.com/bautista-escalante/cashflow_backend/actions/workflows/ci.yml/badge.svg)](https://github.com/bautista-escalante/cashflow_backend/actions)
+![Python](https://img.shields.io/badge/Python-3.[X]-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791)
 
-La API estará disponible en `https://cashflow-backend-bhya.onrender.com`.
 
-La documentación interactiva (Swagger UI) en `https://cashflow-backend-bhya.onrender.com/docs`.
+> 🇬🇧 **English summary:** REST API to track personal cash flow across multiple payment platforms (bank accounts, wallets, cash). It records income and expenses, transfers balance between platforms, and handles USD ↔ ARS exchanges using the real-time "blue dollar" rate (a parallel exchange rate widely used in Argentina). Built with **Python, FastAPI, SQLAlchemy, PostgreSQL and Docker**, with layered architecture inspired by Clean Architecture, automated tests, CI on GitHub Actions, database migrations with Alembic, and continuous deployment on Render.
+
+API REST para llevar el flujo de caja personal repartido en distintas plataformas de pago (billeteras virtuales, cuentas bancarias, efectivo). Registra ingresos y gastos, transferencias entre plataformas y compra/vende dólares aplicando la cotización del **dólar blue en tiempo real**.
+
+🔗 **API en producción:** https://cashflow-backend-bhya.onrender.com
+
+📖 **Documentación interactiva (Swagger):** https://cashflow-backend-bhya.onrender.com/docs
+
+🖥️ **Frontend (Angular/Ionic):** (https://github.com/bautista-escalante/cashflow_frontend)
+
+> ⏳ El servidor está en el plan gratuito de Render: si estuvo inactivo, la primera request puede tardar unos segundos en responder.
+
+<img width="1895" height="860" alt="docs" src="https://github.com/user-attachments/assets/b5207a85-621f-4342-bf24-e7c02699032a" />
+
 ---
 
-## 🚀 Tecnologías
+## ✨ Qué hace
 
-| Tecnología | Uso |
-|---|---|
-| **Python** | Lenguaje principal |
-| **FastAPI** | Framework web para la API REST |
-| **SQLAlchemy** | ORM para la gestión de modelos y queries |
-| **PostgreSQL** | Base de datos relacional |
-| **Docker / Docker Compose** | Contenedorización de la base de datos |
-| **dolarapi.com** | Cotización del dólar blue en tiempo real |
+- **Movimientos:** registra ingresos y gastos asociados a una plataforma, filtrables por tipo.
+- **Evolución del saldo:** calcula el saldo acumulado día a día para graficar el historial financiero.
+- **Plataformas:** administra billeteras y cuentas con su saldo; los nombres se normalizan para evitar duplicados.
+- **Permutaciones:** transfiere saldo entre plataformas y genera el movimiento automáticamente.
+- **Compra/venta de dólares:** detecta si es compra o venta según la plataforma involucrada y guarda la cotización usada en cada operación.
 
 ---
 
-## levantar la api en local
+## 🚀 Stack tecnológico
+
+| Tecnología | Para qué la uso | Por qué |
+| --- | --- | --- |
+| **Python + FastAPI** | API REST | Validación automática con Pydantic y documentación Swagger sin configuración extra |
+| **SQLAlchemy** | ORM | Modelos y queries desacoplados del motor de base de datos |
+| **PostgreSQL** | Base de datos | Alojada en Supabase: persiste mientras el proyecto esté activo y se puede inspeccionar online desde su panel|
+| **Alembic** | Migraciones | Versionar los cambios del esquema en lugar de crear tablas al arrancar |
+| **Docker / Docker Compose** | Contenedores | Entorno reproducible para la app y la base |
+| **pytest** | Tests | tests automatizados unitarios y de integracion |
+| **GitHub Actions** | CI | Corre los tests en cada push |
+| **Render** | Deploy | Despliegue automático desde `main` |
+| **dolarapi.com** | API externa | Cotización del dólar blue en tiempo real |
+
+---
+
+## 🏗️ Arquitectura
+
+El proyecto sigue una **arquitectura en capas inspirada en Clean Architecture**, con el objetivo de separar responsabilidades y que cada capa pueda cambiar sin arrastrar a las demás.
+
+<img width="982" height="477" alt="diagrama" src="https://github.com/user-attachments/assets/54ddb34e-b777-4557-b198-bf090e58cc42" />
 
 ```
-pip install -r requirements.txt 
-```
-```
-docker-compose up
+cashflow_backend/
+├── main.py                  # Punto de entrada
+├── api/routes/              # Presentación: endpoints REST (FastAPI)
+├── core/models/             # Dominio: entidades y reglas de negocio
+├── infrastructure/database/ # Infraestructura: conexión y sesión de PostgreSQL
+├── test/                    # Tests automatizados
+├── .github/workflows/       # Pipeline de CI
+├── Dockerfile
+└── docker-compose.yml
 ```
 
-```
-uvicorn main:app --reload
+- **`api/`** recibe las requests, valida y responde. Es la única capa que conoce HTTP.
+- **`core/`** contiene las entidades y la lógica del negocio (por ejemplo, las reglas de una permutación).
+- **`infrastructure/`** maneja todo lo externo: base de datos [y la llamada a dolarapi, CONFIRMAR dónde vive].
+
+---
+
+## 🧠 Decisiones técnicas
+
+- **Migraciones con Alembic en vez de `create_all`:** el esquema de la base queda versionado en el repo. Si el proyecto de Supabase se pausa o hay que recrear la base, `alembic upgrade head` reconstruye todas las tablas en un solo paso, y los cambios futuros del esquema se aplican sin perder datos.
+- **Base en Supabase, API en Render:** la base gratuita de Render se eliminó dos veces aunque el proyecto estaba en uso. En Supabase los datos persisten mientras el proyecto esté activo y se pueden inspeccionar online desde su panel.
+- **Se guarda `valor_cambio` en cada operación en dólares:** el historial conserva la cotización exacta usada en ese momento, aunque el dólar cambie después.
+
+---
+
+## ✅ Tests y CI/CD
+
+- Los tests viven en `test/` y cubren crud a usuarios, plataformas, movimentos(reglas de negocio) y endpoints(integracion).
+- **GitHub Actions** ejecuta la suite en cada push y reporta si pasó o falló.
+- **Render** despliega automáticamente desde `main`. Hoy el deploy es independiente del resultado del CI.
+
+Correr los tests en local:
+
+```bash
+ python -m pytest -s
 ```
 
+<img width="1417" height="432" alt="test" src="https://github.com/user-attachments/assets/255bd6b5-b422-414a-b091-3752a9e11069" />
+
+---
 
 ## 📌 Endpoints
 
-### 💰 Movimientos
+La referencia completa e interactiva está en **[Swagger](https://cashflow-backend-bhya.onrender.com/docs)**. Resumen:
 
-Los movimientos representan ingresos o gastos asociados a una plataforma.
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| `POST` | `/movimiento` | Registrar un ingreso o gasto |
+| `GET` | `/movimientos` | Listar todos los movimientos |
+| `GET` | `/movimientos/gastos` | Listar solo gastos |
+| `GET` | `/movimientos/ingresos` | Listar solo ingresos |
+| `GET` | `/movimientos/evolucion` | Evolución del saldo en el tiempo |
+| `GET` | `/movimiento/{id}` | Obtener un movimiento |
+| `POST` | `/plataforma` | Crear una plataforma con saldo inicial |
+| `GET` | `/plataformas` | Listar plataformas |
+| `GET` | `/plataforma/{nombre}` | Obtener plataforma por nombre |
+| `POST` | `/permutacion` | Transferir saldo entre plataformas |
+| `POST` | `/permutacion_dolar` | Comprar/vender dólares blue |
 
----
+<details>
+<summary><b>Ejemplo: compra/venta de dólares (<code>POST /permutacion_dolar</code>)</b></summary>
 
-#### `POST /movimiento`
-Registra un nuevo movimiento (ingreso o gasto).
-
-**Body:**
-```json
-{
-  "tipo": "ingreso" | "gasto",
-  "monto": 5000.0,
-  "descripcion": "Sueldo de enero",
-  "categoria": "trabajo",
-  "plataforma_id": 1
-}
-```
-
-**Response `200`:**
-```json
-{
-  "id": 1,
-  "tipo": "ingreso",
-  "monto": 5000.0,
-  "fecha": "2024-01-15",
-  "descripcion": "Sueldo de enero",
-  "categoria": "trabajo",
-  "plataforma_id": 1
-}
-```
-
-**Response `400`:** Error de validación o plataforma inexistente.
-
----
-
-#### `GET /movimientos`
-Retorna todos los movimientos registrados (ingresos y gastos).
-
-**Response `200`:** Lista de objetos `MovimientoResponse`.
-
----
-
-#### `GET /movimientos/gastos`
-Retorna únicamente los movimientos de tipo `gasto`.
-
-**Response `200`:** Lista de objetos `MovimientoResponse`.
-
----
-
-#### `GET /movimientos/ingresos`
-Retorna únicamente los movimientos de tipo `ingreso`.
-
-**Response `200`:** Lista de objetos `MovimientoResponse`.
-
----
-
-#### `GET /movimientos/evolucion`
-Retorna la evolución del saldo acumulado a lo largo del tiempo, agrupada por fecha. Permite visualizar el historial financiero como una línea de tiempo.
-
-**Response `200`:**
-```json
-[
-  { "fecha": "2024-01-10", "saldo": 3000.0 },
-  { "fecha": "2024-01-15", "saldo": 8000.0 },
-  { "fecha": "2024-01-20", "saldo": 6500.0 }
-]
-```
-
-> El saldo es acumulativo: suma los ingresos y resta los gastos día a día en orden cronológico.
-
----
-
-#### `GET /movimiento/{movimiento_id}`
-Retorna un movimiento específico por su ID.
-
-**Path param:** `movimiento_id` — ID entero del movimiento.
-
-**Response `200`:** Objeto `MovimientoResponse`.  
-**Response `400`:** Si no se encuentra el movimiento.
-
----
-
-### 🏦 Plataformas
-
-Las plataformas representan billeteras, cuentas bancarias o cualquier medio de pago donde se almacena saldo.
-
----
-
-#### `POST /plataforma`
-Crea una nueva plataforma con un saldo inicial.
-
-**Body:**
-```json
-{
-  "nombre": "mercadopago",
-  "saldo": 10000.0
-}
-```
-
-**Response `201`:**
-```json
-{
-  "id": 1,
-  "nombre": "mercadopago",
-  "saldo": 10000.0,
-  "fecha_creacion": "2024-01-15T10:00:00"
-}
-```
-
-**Response `400`:** Si ya existe una plataforma con ese nombre.
-
----
-
-#### `GET /plataformas`
-Retorna todas las plataformas registradas.
-
-**Response `200`:** Lista de objetos `PlataformaResponse`.
-
----
-
-#### `GET /plataforma/{nombre}`
-Retorna una plataforma por su nombre. El nombre se normaliza automáticamente (minúsculas, sin espacios).
-
-**Path param:** `nombre` — Nombre de la plataforma (ej: `mercadopago`).
-
-**Response `200`:** Objeto `PlataformaResponse`.  
-**Response `400`:** `"No se encontró la plataforma."`
-
----
-
-### 🔄 Permutaciones
-
-Las permutaciones transfieren saldo entre dos plataformas, registrando el movimiento automáticamente.
-
----
-
-#### `POST /permutacion`
-Transfiere un monto desde una plataforma origen hacia una plataforma destino en la misma moneda.
-
-El saldo de la plataforma origen se reduce y el de la destino se incrementa. Se genera automáticamente un `Movimiento` con la descripción `"cambio de {origen} a {destino}"`.
-
-**Body:**
-```json
-{
-  "tipo": "permutacion",
-  "monto": 2000.0,
-  "plataforma_origen_id": 1,
-  "plataforma_destino_id": 2
-}
-```
-
-**Response `200`:** Objeto `PermutacionResponse`.  
-**Response `400`:** Si el saldo es insuficiente u origen/destino son inválidos.  
-**Response `500`:** Error interno del servidor.
-
----
-
-#### `POST /permutacion_dolar`
-Realiza una compra o venta de dólares entre plataformas, aplicando la cotización del **dólar blue en tiempo real** (via [dolarapi.com](https://dolarapi.com)).
-
-El tipo de operación se determina automáticamente según el nombre de las plataformas:
+La operación se determina por el nombre de las plataformas:
 
 | Operación | Condición | Cotización aplicada |
-|-----------|-----------|---------------------|
-| **Compra** | Plataforma destino se llama `"dolares"` | Precio de venta del blue |
-| **Venta** | Plataforma origen se llama `"dolares"` | Precio de compra del blue |
+| --- | --- | --- |
+| **Compra** | La plataforma destino se llama `dolares` | Precio de venta del blue |
+| **Venta** | La plataforma origen se llama `dolares` | Precio de compra del blue |
 
-**Body:**
+Request:
+
 ```json
 {
   "tipo": "permutacion_dolar",
@@ -215,10 +135,11 @@ El tipo de operación se determina automáticamente según el nombre de las plat
 }
 ```
 
-**Response `200`:**
+Response:
+
 ```json
 {
-  "id": 0,
+  "id": 1,
   "tipo": "permutacion_dolar",
   "monto": 100.0,
   "fecha": "2024-01-15",
@@ -228,74 +149,28 @@ El tipo de operación se determina automáticamente según el nombre de las plat
 }
 ```
 
-> `valor_cambio` refleja la cotización del dólar blue utilizada al momento exacto de la operación.
+</details>
 
-**Response `400`:** Saldo insuficiente o validación fallida.  
-**Response `500`:** Error interno (ej: fallo al consultar la API de cotización).
+<details>
+<summary><b>Ejemplo: evolución del saldo (<code>GET /movimientos/evolucion</code>)</b></summary>
 
----
+El saldo es acumulativo: suma ingresos y resta gastos día a día en orden cronológico.
 
-## 📋 Resumen de endpoints
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| `POST` | `/movimiento` | Registrar un movimiento |
-| `GET` | `/movimientos` | Listar todos los movimientos |
-| `GET` | `/movimientos/gastos` | Listar solo gastos |
-| `GET` | `/movimientos/ingresos` | Listar solo ingresos |
-| `GET` | `/movimientos/evolucion` | Evolución del saldo en el tiempo |
-| `GET` | `/movimiento/{id}` | Obtener movimiento por ID |
-| `POST` | `/plataforma` | Crear una plataforma |
-| `GET` | `/plataformas` | Listar todas las plataformas |
-| `GET` | `/plataforma/{nombre}` | Obtener plataforma por nombre |
-| `POST` | `/permutacion` | Transferir saldo entre plataformas |
-| `POST` | `/permutacion_dolar` | Comprar/vender dólares blue |
-
----
-
-## 🏗️ Arquitectura
-
-El proyecto sigue una arquitectura en capas inspirada en los principios de **Clean Architecture**, separando claramente las responsabilidades en tres módulos principales:
-
-```
-cashflow_backend/
-│
-├── main.py                        # Punto de entrada de la aplicación
-│
-├── api/                           # Capa de presentación
-│   └── routes/                    # Definición de endpoints REST
-│       ├── Movimiento_routes.py
-│       ├── Plataforma_routes.py
-│       └── permutacion_routes.py
-│
-├── core/                          # Capa de dominio / lógica de negocio
-│   └── models/                    # Modelos de dominio (entidades)
-│       ├── Movimiento.py
-│       └── Plataforma.py
-│
-└── infrastructure/                # Capa de infraestructura
-    └── database/
-        └── db.py                  # Configuración de SQLAlchemy y conexión a PostgreSQL
+```json
+[
+  { "fecha": "2024-01-10", "saldo": 3000.0 },
+  { "fecha": "2024-01-15", "saldo": 8000.0 },
+  { "fecha": "2024-01-20", "saldo": 6500.0 }
+]
 ```
 
-### Descripción de capas
-
-**`api/`** — Capa de presentación. Contiene los routers de FastAPI que exponen los endpoints HTTP. Es la única capa que interactúa directamente con las requests y responses.
-
-**`core/`** — Capa de dominio. Define los modelos de datos (entidades) usando SQLAlchemy ORM. Aquí reside la lógica central del negocio, independiente de frameworks externos.
-
-**`infrastructure/`** — Capa de infraestructura. Maneja la configuración de la base de datos, el engine de SQLAlchemy y la sesión de conexión a PostgreSQL.
+</details>
 
 ---
 
-## 🗄️ Base de datos
+## 👤 Autor
 
-La base de datos es **PostgreSQL**, gestionada mediante **SQLAlchemy** como ORM. La conexión y el engine se configuran en `infrastructure/database/db.py`. Las tablas se crean automáticamente al iniciar la aplicación a través de `Base.metadata.create_all(bind=engine)`.
+**Bautista Escalante**, desarrollador backend Python.
 
-
----
-
-
-## 📄 Licencia
-
-Este proyecto es de uso personal/educativo. No cuenta con una licencia específica por el momento.
+- 💼 Portfolio: https://bautistaescalante.vercel.app/VisualPort
+- 🐙 GitHub: https://github.com/bautista-escalanteo
