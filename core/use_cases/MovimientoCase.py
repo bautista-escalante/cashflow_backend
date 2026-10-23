@@ -82,6 +82,20 @@ class movimientoCase:
 
         return movimientos_validados
 
+    def obtener_movimiento_por_id(self, db: Session, movimiento_id: int, id_usuario: int):
+        movimiento_db = db.query(Movimiento).filter(
+            Movimiento.id == movimiento_id,
+            Movimiento.usuario_id == id_usuario
+        ).first()
+
+        if not movimiento_db:
+            raise HTTPException(status_code=404, detail="Movimiento no encontrado")
+
+        if movimiento_db.tipo != "permutacion":
+            return MovimientoResponse.model_validate(movimiento_db)
+        else:
+            return PermutacionResponse.model_validate(movimiento_db)
+
     def obtener_gastos(self, db: Session, anio: int, mes: int, categoria: str, id_usuario: int) -> list[MovimientoResponse]:
 
         MovimientoValidator.validar_fecha(mes, anio)

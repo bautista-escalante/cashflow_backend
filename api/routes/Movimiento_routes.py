@@ -43,6 +43,9 @@ def obtener_evolucion(payload=Depends(AuthService.validar_token), db: Session = 
 
     return movimiento_case.obtener_evolucion(db, payload["user_id"], mes, anio, incluir_dolares) 
 
+@Movimiento_routes.get("/{id_movimiento}")
+def obtener_movimiento_por_id(id_movimiento: int, payload=Depends(AuthService.validar_token), db: Session = Depends(get_db)):
+    return movimiento_case.obtener_movimiento_por_id(db, id_movimiento, payload["user_id"])
 
 @Movimiento_routes.put("/") 
 def modificar_movimiento(movimiento_id: int, descripcion: str,
